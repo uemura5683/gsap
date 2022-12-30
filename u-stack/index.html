@@ -1,0 +1,159 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1024" />
+    <meta name="color-scheme" content="dark" />
+    <script src="https://pixijs.download/release/pixi.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
+    <script src="perlin.js"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background-color: black;
+        color: white;
+      }
+      #myCanvas {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        image-rendering: pixelated; /* アンチエイリアスを無効化 */
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="myCanvas"></canvas>
+    <script>
+      init();
+
+      async function init() {
+
+        noise.seed(Date.now());
+        // 画像を読み込む
+        const image = new Image();
+        image.src = "logo.png";
+        await image.decode();
+
+        // 画像のサイズを算出
+        const imageW = image.width;
+        const imageH = image.height;
+
+        // 画像をメモリ上のcanvasに転写。ピクセル値を取得するため
+        const canvas = document.createElement("canvas");
+        canvas.width = imageW;
+        canvas.height = imageH;
+        const context = canvas.getContext("2d", {
+          // getImageData() を頻繁に読み出すためのヒント
+          willReadFrequently: true,
+        });
+        context.drawImage(image, 0, 0);
+
+        // ----------------------------------------------
+        // PixiJSのセットアップ
+        // ----------------------------------------------
+
+        // PIXIのアプリケーションを作成する
+        const app = new PIXI.Application({
+          resolution: window.devicePixelRatio,
+          resizeTo: window,
+          view: document.querySelector("#myCanvas"),
+        });
+
+        // コンテナーを利用
+        const container = new PIXI.Container();
+        app.stage.addChild(container);
+
+        // ----------------------------------------------
+        // パーティクルの生成
+        // ----------------------------------------------
+        const dots = []; // パーティクルの保存先
+
+        const lengthW = imageW;
+        const lengthH = imageH;
+
+        for (let i = 0; i < lengthW * lengthH; i++) {
+          // カウンタ変数 i から x, y を算出
+          const x = i % lengthW;
+          const y = Math.floor(i / lengthW);
+
+          // x,y座標の画素情報を取得
+          const dotData = context.getImageData(x, y, 1, 1);
+          // 透過チャンネルを取得(0 = 赤, 1 = 緑, 2 = 青, 3 = アルファ)
+          const alpha = dotData.data[3];
+
+          // 透明だったらスプライトは作らないようにする
+          if (alpha === 0) {
+            continue;
+          }
+
+          // パーティクルを生成
+          const dot = new PIXI.Sprite(PIXI.Texture.WHITE);
+          dot.x = x - imageW / 2;
+          dot.y = y - imageH / 2;
+          dot.width = 1;
+          dot.height = 1;
+          dot.alpha = alpha / 255; // 元画像の透明度を適用
+          container.addChild(dot);
+          // パーティクルにXYの算出元番号を記録
+          dot.offsetIndex = i;
+          // 配列に保存
+          dots.push(dot);
+        }
+
+        // ----------------------------------------------
+        // モーションの実装
+        // ----------------------------------------------
+
+        // GSAPのタイムラインを作成（各トゥイーンを集約管理するため）
+        const tl = gsap.timeline({ repeat: 0, yoyo: false });
+
+        // 画面サイズを取得
+        const stageW = app.screen.width;
+        const stageH = app.screen.height;
+
+        for (let i = 0; i < dots.length; i++) {
+          const dot = dots[i];
+
+          const index = dot.offsetIndex;
+
+          // XとYを正規化 (Normalize X and Y)
+          // nx は左辺を基準に 0.0〜1.0の値をとる
+          const nx = (index % lengthW) / lengthW;
+          // ny は上辺を基準に 0.0〜1.0の値をとる
+          const ny = Math.floor(index / lengthW) / lengthH;
+
+          // パーリンノイズでパーティクルの移動座標を決める。
+          // パーリンノイズだと連続性が生まれるので、波打つ表現になる。
+          // 乗算は周期と考えてもらえばOK。
+          const px = noise.perlin2(nx, ny);
+          const py = noise.perlin2(nx * 2, ny);
+
+          tl.from(
+            dot,
+            {
+              x: stageW * px,
+              y: stageH * py,
+              alpha: 0,
+              duration: 4,
+              ease: "expo.inOut",
+            },
+            0, // 各トゥイーンは0秒地点を開始とする
+          );
+        }
+
+        // 待機時間を設ける
+        tl.add(() => {}, "+=0.5");
+
+        const resize = () => {
+          // コンテナーを中心に移動
+          container.x = app.screen.width / 2;
+          container.y = app.screen.height / 2;
+        };
+        window.addEventListener("resize", resize);
+        resize();
+      }
+    </script>
+  </body>
+</html>
