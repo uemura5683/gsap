@@ -4,6 +4,54 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="css.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js" defer></script>
+    <script>
+      window.addEventListener("DOMContentLoaded", () => {
+        // デモ説明のためのデフォルト設定
+        gsap.defaults({
+          repeat: -1, // 無限に繰り返し
+          repeatDelay: 0.5, // 繰り返し時に0.5秒の待機
+        });
+        // たくさんの矩形を配置
+        for (let i = 0; i < 1000; i++) {
+          const rect = document.createElement("div");
+          rect.classList.add("rect");
+          document.body.appendChild(rect);
+          rect.style.left = `${i / 10}vw`;
+          rect.style.backgroundColor = `hsl(${i / 10}, 70%, 70%)`;
+
+          const rect_bottom = document.createElement("div");
+          rect_bottom.classList.add("rect_bottom");
+          document.body.appendChild(rect_bottom);
+          rect_bottom.style.left = `${i / 10}vw`;
+          rect_bottom.style.backgroundColor = `hsl(${i / 10}, 70%, 70%)`;
+        }
+
+        // 画面下部に落下
+        gsap.to(".rect_bottom", {
+          y: "-100vh",
+          duration: 5,
+          yoyo: true,
+          ease: "bounce.out",
+          stagger: {
+            each: 0.01, // ばらす間隔（秒）
+            from: "random", // ランダムに開始
+          },
+        });
+
+        // 画面下部に落下
+        gsap.to(".rect", {
+          y: "100vh",
+          duration: 5,
+          yoyo: true,
+          ease: "bounce.out",
+          stagger: {
+            each: 0.01, // ばらす間隔（秒）
+            from: "random", // ランダムに開始
+          },
+        });
+      });
+    </script>
   </head>
   <body>
     <div class="wrapper">
