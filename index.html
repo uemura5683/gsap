@@ -30,9 +30,9 @@
         // 画面下部に落下
         gsap.to(".rect_bottom", {
           y: "-100vh",
-          duration: 5,
+          duration: 3,
           yoyo: true,
-          ease: "bounce.out",
+          ease: "power1",
           stagger: {
             each: 0.01, // ばらす間隔（秒）
             from: "random", // ランダムに開始
@@ -42,9 +42,9 @@
         // 画面下部に落下
         gsap.to(".rect", {
           y: "100vh",
-          duration: 5,
+          duration: 3,
           yoyo: true,
-          ease: "bounce.out",
+          ease: "power1",
           stagger: {
             each: 0.01, // ばらす間隔（秒）
             from: "random", // ランダムに開始
