@@ -1,0 +1,187 @@
+<html lang="ja">
+  <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# article: http://ogp.me/ns/article#">
+    <meta charset="UTF-8">
+    <title>GSAP タイムラインの時間制御</title>
+    <!-- GSAP読み込み -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/EasePack.min.js"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "vue": "https://unpkg.com/vue@3.2.47/dist/vue.esm-browser.js"
+        }
+      }
+    </script>
+    <script type="module">
+      import { ref, watch, watchEffect, createApp, computed } from "vue";
+
+      function createChildTimeline(element) {
+        const elText = element.querySelector(".rect");
+        const tl = gsap
+          .timeline()
+          .from(element, {
+            y: 16,
+            opacity: 0,
+            duration: 0.75,
+            ease: "power4.out",
+          })
+          .set(elText, { opacity: 0 })
+          .to(
+            elText,
+            {
+              x: "105%",
+              duration: 1,
+              ease: "power4.out",
+            },
+            "-=50%",
+          );
+        return tl;
+      }
+
+      // タイムラインを作成
+      const tl = gsap.timeline({
+        repeat: -1,
+        paused: true,
+      });
+
+      document.querySelectorAll(".word").forEach((word) => {
+        tl.add(createChildTimeline(word), "-=80%");
+      });
+
+      const app = createApp({
+        /* Vue.jsの各種処理 */
+        setup() {
+          const current = ref(0);
+          const duration = ref(tl.duration());
+          const speed = ref(1);
+          const ease = ref("none");
+          const lock = ref(false);
+
+          const stop = () => {
+            gsap.killTweensOf(current);
+            current.value = 0;
+            lock.value = false;
+          };
+          const pause = () => {
+            gsap.killTweensOf(current);
+            lock.value = false;
+          };
+          const play = () => {
+            const speedNum = 1 / Number(speed.value);
+            const from = tl.duration() === tl.time() ? 0 : tl.time();
+            const duration =
+              tl.duration() === tl.time()
+                ? tl.duration() * speedNum
+                : (tl.duration() - tl.time()) * speedNum;
+
+            console.log(ease.value);
+            gsap.fromTo(
+              current,
+              { value: from },
+              {
+                value: tl.duration(),
+                duration,
+                ease: ease.value,
+                onStart: () => {
+                  lock.value = true;
+                },
+                onComplete: () => {
+                  lock.value = false;
+                },
+              },
+            );
+          };
+          watch(
+            () => tl.time(),
+            (next, old) => {
+              console.log(next, old);
+              console.log(tl.time());
+            },
+          );
+          watchEffect(() => {
+            tl.seek(Number(current.value));
+          });
+
+          const timeDisplay = computed(() => Number(current.value).toFixed(2));
+
+          return {
+            current,
+            duration,
+            stop,
+            play,
+            pause,
+            speed,
+            ease,
+            lock,
+            timeDisplay,
+          };
+        },
+      });
+      app.mount("#app");
+    </script>
+    <link rel="stylesheet" href="css.css">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  </head>
+  <body>
+    <p class="white">
+      <a href="https://ics.media/entry/220825/#%E3%82%BF%E3%82%A4%E3%83%A0%E3%83%A9%E3%82%A4%E3%83%B3%E3%81%AE%E6%99%82%E9%96%93%E5%88%B6%E5%BE%A1">
+        タイムラインの時間制御
+      </a>
+    </p>
+    <div class="container">
+      <div>
+        <span class="word"
+          ><span class="rect"></span
+          ><span class="label">INTERACTION</span></span
+        >
+        <span class="word"
+          ><span class="rect"></span><span class="label">DESIGN</span></span
+        >
+        <span class="word"
+          ><span class="rect"></span><span class="label">&</span></span
+        >
+        <span class="word"
+          ><span class="rect"></span><span class="label">TECHNOLOGY</span></span
+        >
+        <span class="word"
+          ><span class="rect"></span><span class="label">by</span></span
+        >
+        <span class="word"
+          ><span class="rect"></span><span class="label">ICS MEDIA</span></span
+        >
+      </div>
+      <div id="app">
+        <div class="ui">
+          <div class="buttons">
+            <button @click="stop" title="Stop">■</button>
+            <button @click="pause" title="Pause">||</button>
+            <button @click="play" title="Play">▶</button>
+          </div>
+          <div class="range">
+            <input
+              type="range"
+              min="0"
+              :max="duration"
+              step="0.001"
+              v-model="current"
+            />
+          </div>
+          <div class="time">{{timeDisplay}}sec</div>
+
+          <div class="speed">
+            <select v-model="speed" :disabled="lock" title="Play Speed">
+              <option value="0.5">x0.5</option>
+              <option value="1">x1</option>
+              <option value="2">x2</option>
+            </select>
+            <select v-model="ease" :disabled="lock" title="Use Easing">
+              <option value="none">Normal</option>
+              <option value="slow(0.3, 0.95, false)">Custom Ease</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
