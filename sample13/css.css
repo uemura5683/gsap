@@ -1,0 +1,32 @@
+html {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  color: white;
+  background: #000;
+  height: 100%;
+  font-family: sans-serif;
+  display: grid;
+  place-items: center;
+}
+
+a {
+  color: white;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: repeat(13, 5vw);
+  gap: 10px;
+}
+
+.rect {
+  width: 5vw;
+  height: 5vw;
+  display: block;
+  border: white 2px solid;
+  position: relative;
+}
