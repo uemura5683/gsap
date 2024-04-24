@@ -1,0 +1,12 @@
+body {
+  color: white;
+  background: #000;
+  font-family: sans-serif;
+}
+a {
+  color: white;
+}
+path {
+  stroke-width: 1;
+  stroke: #333;
+}
