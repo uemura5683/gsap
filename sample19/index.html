@@ -1,0 +1,33 @@
+<html lang="ja">
+  <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# article: http://ogp.me/ns/article#">
+    <meta charset="UTF-8">
+    <title>GSAP 曲線2</title>
+    <!-- GSAP読み込み -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
+    <link rel="stylesheet" href="css.css">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  </head>
+  <body>
+    <div class="container">
+      <h1>Mouse Stalker Example</h1>
+      <button>quickSetter</button>
+      <p>
+        If you find yourself calling gsap.set() many times on the same object
+        (or set of objects), like in a "mousemove" event, you can boost
+        performance 50% - 250% by creating a quickSetter function and using that
+        instead of gsap.set().
+      </p>
+
+      <div class="flex">
+        <button>Button A</button>
+        <button>Button B</button>
+        <button>Button C</button>
+        <button>Button D</button>
+        <button>Button E</button>
+      </div>
+    </div>
+    <div class="stalker"></div>
+    <script src="script.js" defer></script>
+  </body>
+</html>

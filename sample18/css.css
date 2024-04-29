@@ -1,0 +1,28 @@
+html {
+  height: 100%;
+}
+body {
+  margin: 0;
+  padding: 0;
+  color: white;
+  background: black;
+  height: 100%;
+  display: grid;
+  place-items: center;
+}
+a {
+  color: white;
+}
+.container {
+  position: absolute;
+}
+.rect {
+  width: 1vw;
+  height: 1vw;
+  position: absolute;
+  background-color: white;
+  top: 0;
+  left: 0;
+  mix-blend-mode: screen;
+  border-radius: 50%;
+}
